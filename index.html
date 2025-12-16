@@ -1,24 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Weather App</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weatherri | Mohammad Kaif Shaikh</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    color: #fff;
+}
+
+/* Animated background */
+body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background-size: 400% 400%;
+    animation: bgMove 12s ease infinite;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes bgMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* App container */
+.app {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+    border-radius: 24px;
+    padding: 2.8rem;
+    width: 90%;
+    max-width: 420px;
+    margin: auto;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+}
+
+/* Title */
+h1 {
+    margin: 0;
+    font-size: 2.6rem;
+    color: #9ffcff;
+}
+
+.tagline {
+    font-size: 0.9rem;
+    color: #ddd;
+    margin-bottom: 1.5rem;
+}
+
+/* Input */
+input {
+    width: 85%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+}
+
+/* Button */
+button {
+    margin-top: 1rem;
+    padding: 12px 28px;
+    border-radius: 30px;
+    border: none;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+button:hover {
+    transform: scale(1.08);
+}
+
+/* Loader */
+.loader {
+    width: 42px;
+    height: 42px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top: 4px solid #00c6ff;
+    border-radius: 50%;
+    margin: 20px auto;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Weather output */
+.weather {
+    margin-top: 1.4rem;
+    font-size: 1rem;
+}
+
+.weather img {
+    width: 90px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.weather p {
+    margin: 0.4rem 0;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+footer span {
+    color: #00c6ff;
+    font-weight: 600;
+}
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <h1>Check Weather</h1>
-    <input type="text" id="locationInput" placeholder="Enter city (e.g., London)" />
-    <button onclick="getWeather()">Get Weather</button>
 
-    <div class="weather-box" id="weather"></div>
-  </div>
+<div class="app">
+    <h1>🌦️ Weatherri</h1>
+    <div class="tagline">Simple • Fast • Real-Time Weather</div>
 
-  <footer>
-    Made with ❤️ by Mohammad Kaif Shaikh
-  </footer>
+    <input 
+        type="text" 
+        id="city"
+        placeholder="Enter city (e.g., Mumbai)"
+        onkeypress="if(event.key==='Enter') getWeather()"
+    >
 
-  <script src="script.js"></script>
+    <button onclick="getWeather()">Check Weather</button>
+
+    <div class="loader" id="loader"></div>
+    <div class="weather" id="weather"></div>
+</div>
+
+<footer>
+    Made with ❤️ by <span>Mohammad Kaif Shaikh</span>
+</footer>
+
+<script>
+function getWeather() {
+    const city = document.getElementById("city").value.trim();
+    const weatherBox = document.getElementById("weather");
+    const loader = document.getElementById("loader");
+    const apiKey = "b54d2922b5cb4b5ca58141201252605";
+
+    if (!city) {
+        weatherBox.innerHTML = "⚠️ Please enter a city name.";
+        return;
+    }
+
+    weatherBox.innerHTML = "";
+    loader.style.display = "block";
+
+    fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`)
+        .then(res => res.json())
+        .then(data => {
+            loader.style.display = "none";
+
+            if (data.error) {
+                weatherBox.innerHTML = "❌ City not found.";
+                return;
+            }
+
+            const w = data.current;
+            const loc = data.location;
+
+            weatherBox.innerHTML = `
+                <img src="https:${w.condition.icon}">
+                <p><strong>${loc.name}, ${loc.country}</strong></p>
+                <p>${w.condition.text}</p>
+                <p>🌡 ${w.temp_c}°C (Feels ${w.feelslike_c}°C)</p>
+                <p>💧 Humidity: ${w.humidity}%</p>
+                <p>🌬 Wind: ${w.wind_kph} km/h</p>
+            `;
+        })
+        .catch(() => {
+            loader.style.display = "none";
+            weatherBox.innerHTML = "⚠️ Unable to fetch weather data.";
+        });
+}
+</script>
+
 </body>
 </html>
+
